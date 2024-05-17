@@ -1,0 +1,11 @@
+Moodles_EN {
+	Moodles_Flashlight_Good_lvl1 = "Light On",
+	Moodles_Flashlight_Good_desc_lvl1 = "",
+	Moodles_Flashlight_Bad_lvl1 = "Light Off",
+	Moodles_Flashlight_Bad_desc_lvl1 = "",
+
+	Moodles_Lighter_Good_lvl1 = "Lit Flame",
+	Moodles_Lighter_Good_desc_lvl1 = "",
+	Moodles_Lighter_Bad_lvl1 = "Unlit Flame",
+	Moodles_Lighter_Bad_desc_lvl1 = "",
+}

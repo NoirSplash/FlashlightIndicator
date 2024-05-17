@@ -1,0 +1,18 @@
+UI_EN = {
+	UI_FlashlightIndicator_UseAlternateIcons = "Use Alternative Icons",
+	UI_FlashlightIndicator_UseAlternateIconsTooltip = "Switch between the standard and alternate moodle icon styles.",
+
+	UI_FlashlightIndicator_ShowBackgrounds = "Show Moodle Backgrounds",
+	UI_FlashlightIndicator_ShowBackgroundsTooltip = "Choose whether or not to display the circular background behind the icons.",
+
+	UI_FlashlightIndicator_FlashlightMoodleDisplayType = "Enable Light Moodle",
+	UI_FlashlightIndicator_FlashlightMoodleDisplayTypeTooltip = "Display moodles for bulb-based light sources when on, off or both.",
+
+	UI_FlashlightIndicator_LighterMoodleDisplayType = "Enable Flame Moodle",
+	UI_FlashlightIndicator_LighterMoodleDisplayTypeTooltip = "Display moodles for flame-based light sources when on, off or both.",
+
+	UI_FlashlightIndicator_DropdownOptionBoth = "Both",
+	UI_FlashlightIndicator_DropdownOptionOnlyOn = "Lit Only",
+	UI_FlashlightIndicator_DropdownOptionOnlyOff = "Unlit Only",
+	UI_FlashlightIndicator_DropdownOptionDisabled = "Disabled",
+}
