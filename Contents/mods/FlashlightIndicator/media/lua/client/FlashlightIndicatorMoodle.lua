@@ -2,7 +2,7 @@
 	NAME: FlashlightIndicatorMoodle.lua
 	AUTHOR: GLICK!
 	DATE: May 12, 2024
-	UPDATED: May 14, 2024
+	UPDATED: May 19, 2024
 
 	This module provides an interface for FlashlightIndicator.lua to access
 	MoodleFramework. It aims to support expandability and allow the option to
@@ -143,6 +143,21 @@ end
 ]]
 function TorchMoodle.Hide(playerObject, moodleName)
 	setMoodleValue(moodleName, playerObject, MOODLE_STATES.Disabled)
+end
+
+--[[
+	Simple helper function to check if the specified moodle is set to active
+	(good) for the player.
+
+	param#1 <IsoPlayer> playerObject
+	param#2 <string> moodleName
+]]
+function TorchMoodle.IsActive(playerObject, moodleName)
+	local moodle = getMoodle(moodleName, playerObject)
+	if moodle then
+		return moodle:getValue() == MOODLE_STATES.Active
+	end
+	return false
 end
 
 --[[

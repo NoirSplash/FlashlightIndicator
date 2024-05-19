@@ -2,7 +2,7 @@
 	NAME: FlashlightIndicator.lua
 	AUTHOR: GLICK!
 	DATE: May 12, 2024
-	UPDATED: May 17, 2024
+	UPDATED: May 19 2024
 
 	This module runs a loop at a constant rate which checks for players who have
 	active light sources and enables the respective 'lit' icon. It also listens
@@ -18,11 +18,10 @@
 
 local IndicatorIcon = require("FlashlightIndicatorIcon")
 local IndicatorOptions = require("FlashlightIndicatorOptions")
-local Calendar = getGameTime():getCalender()
 
 -- This determines how often we check players for light sources in milliseconds.
 -- Lowering this will increase performance impact and responsiveness.
-local REFRESH_RATE_MILLIS = 250
+local REFRESH_RATE_MILLIS = 0.250
 
 local FlashlightIndicator = {}
 --[[
@@ -50,25 +49,15 @@ FlashlightIndicator.settings = {
 }
 
 local displayTypeActivationMap = { [1] = true, [2] = true, [3] = false, [4] = false }
-local lastTimestamp = Calendar:getTimeInMillis() - REFRESH_RATE_MILLIS
+local lastTimestamp = os.time() - REFRESH_RATE_MILLIS
+--local lastTimestamp = Calendar:getTimeInMillis() - REFRESH_RATE_MILLIS
 local playersEquippedItems = {} --:{ [playerIndex<number>]: { [number]: { InventoryItem, TorchType } }
 
-local function canActivateStatus(torchType)
-	local settingKey = string.lower(torchType) .. "DisplayType"
-	return displayTypeActivationMap[FlashlightIndicator.settings[settingKey]]
-end
-
-local hasLightSource = {
+local isTorchType = {
 	Flashlight = function(inventoryItem)
-		if not canActivateStatus("Flashlight") then
-			return nil
-		end
 		return inventoryItem:isTorchCone() ~= false
 	end,
 	Lighter = function(inventoryItem)
-		if not canActivateStatus("Lighter") then
-			return nil
-		end
 		return inventoryItem:getTorchDot() > 0
 	end,
 }
@@ -100,41 +89,53 @@ local function filterUnequippedItems(playerObject, itemList)
 	end
 end
 
+local function getTorchTypeOfItem(inventoryItem)
+	for torchType, isOfType in pairs(isTorchType) do
+		if isOfType(inventoryItem) then
+			return torchType
+		end
+	end
+	return false
+end
+
 -- LightingJNI.java handles lighting updates internally each tick and cannot
 -- be forked so unfortunately we poll for active lighting items instead of
 -- listening to relevant events.
 -- (If you're aware of a better way to do this, please contact me on Steam -GLICK!)
 local function update()
-	local now = Calendar:getTimeInMillis()
-	if lastTimestamp - now > REFRESH_RATE_MILLIS then
+	local now = os.time()
+	if now - lastTimestamp < REFRESH_RATE_MILLIS then
 		return
 	end
 	lastTimestamp = now
 
 	forAllPlayers(function(playerIndex, playerObject)
-		local validLights = {}
+		local playerActiveTorchTypes = {}
 		-- getActiveLightItems mutates an ArrayList directly instead of
 		-- returning one so we are giving it a fresh one
 		local activeLightItems = ArrayList.new()
 		playerObject:getActiveLightItems(activeLightItems)
 		for itemIndex = 0, (activeLightItems:size() - 1) do
 			local inventoryItem = activeLightItems:get(itemIndex)
-			for torchType, hasLight in pairs(hasLightSource) do
-				local result = hasLight(inventoryItem)
-				if result ~= false then
-					validLights[torchType] = result
-					if result == true then
-						IndicatorIcon.Activate(playerObject, torchType)
-					end
-					break
-				end
+			local torchType = getTorchTypeOfItem(inventoryItem)
+			if torchType then
+				playerActiveTorchTypes[torchType] = true
 			end
 		end
 
-		for torchType, _hasLight in pairs(hasLightSource) do
-			if not validLights[torchType] and IndicatorIcon.IsEnabled(playerObject, torchType) then
+		for torchType, _isActiveLight in pairs(isTorchType) do
+			if playerActiveTorchTypes[torchType] then
+				if not IndicatorIcon.IsActive(playerObject, torchType) then
+					IndicatorIcon.Activate(playerObject, torchType)
+				end
+			elseif IndicatorIcon.IsEnabled(playerObject, torchType) then
 				IndicatorIcon.Deactivate(playerObject, torchType)
 			end
+			-- if not playerActiveTorchTypes[torchType]
+			-- 	and IndicatorIcon.IsEnabled(playerObject, torchType)
+			-- then
+			-- 	IndicatorIcon.Deactivate(playerObject, torchType)
+			-- end
 		end
 
 		local playerItems = playersEquippedItems[playerIndex]
@@ -150,7 +151,7 @@ local function onItemEquipped(isoGameCharacter, inventoryItem)
 	end
 
 	local itemTorchType
-	for torchType, hasLight in pairs(hasLightSource) do
+	for torchType, hasLight in pairs(isTorchType) do
 		local result = hasLight(inventoryItem)
 		if result == true then
 			itemTorchType = torchType
@@ -175,7 +176,7 @@ end
 
 local function onPlayerDied(playerObject)
 	playersEquippedItems[playerObject:getPlayerNum()] = {}
-	for torchType, _hasLight in pairs(hasLightSource) do
+	for torchType, _hasLight in pairs(isTorchType) do
 		IndicatorIcon.Hide(playerObject, torchType)
 	end
 end
@@ -190,7 +191,7 @@ local function onPlayerCreated(_playerIndex, playerObject)
 			return
 		end
 
-		for torchType, hasLight in pairs(hasLightSource) do
+		for torchType, hasLight in pairs(isTorchType) do
 			local result = hasLight(inventoryItem)
 			if result == true then
 				-- Deactivate() instead of Activate() since our update() loop will
@@ -226,10 +227,10 @@ if IndicatorOptions and IndicatorOptions.onSettingApplied then
 			IndicatorIcon.SetBackgroundsEnabled(newValue)
 		end,
 		flashlightDisplayType = function(_oldValue, newValue)
-			IndicatorIcon.enabledTorchTypes["Flashlight"] = newValue
+			IndicatorIcon.torchDisplayTypes["Flashlight"] = newValue
 		end,
 		lighterDisplayType = function(_oldValue, newValue)
-			IndicatorIcon.enabledTorchTypes["Lighter"] = newValue
+			IndicatorIcon.torchDisplayTypes["Lighter"] = newValue
 		end,
 	}
 
