@@ -1,0 +1,6 @@
+name=Flashlight Indicator - Moodle
+poster=poster.png
+id=FlashlightIndicatorMoodle
+versionMin=41.78
+authors=GLICK!
+description=Addon for Flashlight Indicator Icons that displays moodles for each status.

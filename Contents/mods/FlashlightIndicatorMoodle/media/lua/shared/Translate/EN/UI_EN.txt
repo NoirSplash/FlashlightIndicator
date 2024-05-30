@@ -1,21 +1,18 @@
 UI_EN = {
 	UI_FlashlightIndicator_UseAlternateIcons = "Use Alternative Icons",
 	UI_FlashlightIndicator_UseAlternateIconsTooltip = "Switch between the standard and alternate moodle icon styles.",
-	
-	UI_FlashlightIndicator_IndicatorPosition = "Indicator Icon Position",
-	UI_FlashlightIndicator_IndicatorPositionTooltip = "Choose whether the icon displays above or below your character.",
+
+	UI_FlashlightIndicator_ShowBackgrounds = "Show Icon Backgrounds",
+	UI_FlashlightIndicator_ShowBackgroundsTooltip = "Choose whether or not to display the background image behind the icons.",
 
 	UI_FlashlightIndicator_FlashlightDisplayType = "Enable Light Indicator",
-	UI_FlashlightIndicator_FlashlightDisplayTypeTooltip = "Display indicator for bulb-based light sources when on, off or both.",
+	UI_FlashlightIndicator_FlashlightDisplayTypeTooltip = "Display indicators for bulb-based light sources when on, off or both.",
 
 	UI_FlashlightIndicator_LighterDisplayType = "Enable Flame Indicator",
-	UI_FlashlightIndicator_LighterDisplayTypeTooltip = "Display indicator for flame-based light sources when on, off or both.",
+	UI_FlashlightIndicator_LighterDisplayTypeTooltip = "Display indicators for flame-based light sources when on, off or both.",
 
 	UI_FlashlightIndicator_DropdownOptionBoth = "Both",
 	UI_FlashlightIndicator_DropdownOptionOnlyOn = "Lit Only",
 	UI_FlashlightIndicator_DropdownOptionOnlyOff = "Unlit Only",
 	UI_FlashlightIndicator_DropdownOptionDisabled = "Disabled",
-
-	UI_FlashlightIndicator_DropdownOptionAbove = "Above",
-	UI_FlashlightIndicator_DropdownOptionBelow = "Below",
 }

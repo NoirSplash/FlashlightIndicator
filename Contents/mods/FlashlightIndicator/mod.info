@@ -1,6 +1,6 @@
-name=Flashlight Indicator - Moodle
+name=Flashlight Indicator Icons
 poster=poster.png
-id=FlashlightIndicatorMoodle
+id=FlashlightIndicator
 versionMin=41.78
 authors=GLICK!
-description=Simple mod that displays a moodle when your flashlight is enabled.
+description=Simple mod that displays a status indicator for your flashlight.

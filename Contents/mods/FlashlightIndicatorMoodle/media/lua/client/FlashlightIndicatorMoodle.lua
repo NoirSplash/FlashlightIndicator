@@ -26,6 +26,7 @@ local TorchMoodle = {
 }
 
 if not MoodleFramework then
+	print("[ERROR] FlashlightIndicatorMoodle failed to initialize; Missing mod dependency 'MoodleFramework', did you forget to enable it?")
 	return TorchMoodle
 end
 
@@ -115,8 +116,8 @@ end
 	If the provided moodleName corresponds to a moodle, sets the moodle
 	value to the "good" threshold.
 
-	param#1 <IsoPlayer> playerObject
-	param#2 <string> moodleName
+	@param1 <IsoPlayer> playerObject
+	@param2 <string> moodleName
 ]]
 function TorchMoodle.Activate(playerObject, moodleName)
 	setMoodleValue(moodleName, playerObject, MOODLE_STATES.Active)
@@ -126,8 +127,8 @@ end
 	If the provided moodleName corresponds to a moodle, sets the moodle
 	value to the "bad" threshold.
 
-	param#1 <IsoPlayer> playerObject
-	param#2 <string> moodleName
+	@param1 <IsoPlayer> playerObject
+	@param2 <string> moodleName
 ]]
 function TorchMoodle.Deactivate(playerObject, moodleName)
 	setMoodleValue(moodleName, playerObject, MOODLE_STATES.Inactive)
@@ -137,9 +138,9 @@ end
 	Handles moodle visibility by setting the moodle to neutral (0.5) or
 	inactive (0) if not already visible.
 
-	param#1 <IsoPlayer> playerObject
-	param#2 <string> moodleName
-	param#3 <boolean> isVisible
+	@param1 <IsoPlayer> playerObject
+	@param2 <string> moodleName
+	@param3 <boolean> isVisible
 ]]
 function TorchMoodle.Hide(playerObject, moodleName)
 	setMoodleValue(moodleName, playerObject, MOODLE_STATES.Disabled)
@@ -149,8 +150,8 @@ end
 	Simple helper function to check if the specified moodle is set to active
 	(good) for the player.
 
-	param#1 <IsoPlayer> playerObject
-	param#2 <string> moodleName
+	@param1 <IsoPlayer> playerObject
+	@param2 <string> moodleName
 ]]
 function TorchMoodle.IsActive(playerObject, moodleName)
 	local moodle = getMoodle(moodleName, playerObject)
@@ -165,8 +166,8 @@ end
 	enabled. Primarily used as part of the logic controller's
 	(FlashlightIndicator.lua) evaluation cycle.
 
-	param#1 <IsoPlayer> playerObject
-	param#2 <string> moodleName
+	@param1 <IsoPlayer> playerObject
+	@param2 <string> moodleName
 ]]
 function TorchMoodle.Has(playerObject, moodleName)
 	local moodle = getMoodle(moodleName, playerObject)
@@ -181,7 +182,7 @@ end
 	Switches between the two icon sets defined in MOODLE_ICON_DIRECTORIES.
 	Called from FlashlightIndicator.lua when a setting is updated.
 
-	param#1 <boolean> useAlternateIcons
+	@param1 <boolean> useAlternateIcons
 ]]
 function TorchMoodle.SetIcons(useAlternateIcons)
 	local iconDirectory	do
@@ -193,8 +194,8 @@ function TorchMoodle.SetIcons(useAlternateIcons)
 	end
 
 	local function setMoodleIcon(moodle, moodleName)
-		-- param#1 is goodBadNeutral (Neutral = 0, Good = 1, Bad = 2)
-		-- param#2 is moodleLevel, we only use '1' because our moodles are binary
+		-- arg#1 is goodBadNeutral (Neutral = 0, Good = 1, Bad = 2)
+		-- arg#2 is moodleLevel, we only use '1' because our moodles are binary
 		moodle:setPicture(1, 1, getTexture(iconDirectory .. moodleName .. "_On.png"))
 		moodle:setPicture(2, 1, getTexture(iconDirectory .. moodleName .. "_Off.png"))
 		moodle:setTitle(1, 1, getText("Moodles_" .. moodleName .. "_Good_lvl1"))
@@ -226,7 +227,7 @@ end
 --[[
 	Sets the background moodle image to the default image (true) or nil (false).
 
-	param#1 <boolean> showBackgrounds
+	@param1 <boolean> showBackgrounds
 ]]
 function TorchMoodle.SetBackgroundsEnabled(showBackgrounds)
 	local function setMoodleBackground(moodle)

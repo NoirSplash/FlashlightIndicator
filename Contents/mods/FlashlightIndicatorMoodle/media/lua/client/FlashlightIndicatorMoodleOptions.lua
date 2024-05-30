@@ -22,7 +22,7 @@ end
 -- We use an exclusive condition because if both mods are enabled we want to
 -- prioritize MCM
 if Mod["IsMCMInstalled_v1"] then
-	local indicatorOptions = ModOptionTable:New("FlashlightIndicator", "Flashlight Indicator", false)
+	local indicatorOptions = ModOptionTable:New("FlashlightIndicatorMoodle", "Flashlight Indicator - Moodle", false)
 	local dropdownItems = {
 		[1] = getText("UI_FlashlightIndicator_DropdownOptionBoth"),
 		[2] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOn"),
@@ -38,37 +38,22 @@ if Mod["IsMCMInstalled_v1"] then
 		end
 	end
 
-	-- [Use Alternate Icons]
-	-- Swaps between the default and alternate icon images
+	-- [Show Backgrounds]
+	-- Determines whether to show the background behind moodle icons
 	indicatorOptions:AddModOption(
-		"useAlternateIcons",
+		"showBackgrounds",
 		"checkbox",
 		false,
 		nil,
-		getText("UI_FlashlightIndicator_UseAlternateIcons"),
-		getText("UI_FlashlightIndicator_UseAlternateIconsTooltip"),
-		getSettingAppliedHandler("useAlternateIcons")
-	)
-
-	-- [Indicator Position]
-	-- Determines if the icon should render above or below the character
-	indicatorOptions:AddModOption(
-		"indicatorPosition",
-		"combobox",
-		1,
-		{
-			[1] = getText("UI_FlashlightIndicator_DropdownOptionAbove"),
-			[2] = getText("UI_FlashlightIndicator_DropdownOptionBelow"),
-		},
-		getText("UI_FlashlightIndicator_IndicatorPosition"),
-		getText("UI_FlashlightIndicator_IndicatorPositionTooltip"),
-		getSettingAppliedHandler("indicatorPosition")
+		getText("UI_FlashlightIndicator_ShowBackgrounds"),
+		getText("UI_FlashlightIndicator_ShowBackgroundsTooltip"),
+		getSettingAppliedHandler("showBackgrounds")
 	)
 
 	-- [Moodle Types]
 	-- All "type" settings dictate display conditions for their respective moodle
 	indicatorOptions:AddModOption(
-		"flashlightDisplayType",
+		"flashlightMoodleDisplayType",
 		"combobox",
 		1,
 		dropdownItems,
@@ -77,7 +62,7 @@ if Mod["IsMCMInstalled_v1"] then
 		getSettingAppliedHandler("flashlightDisplayType")
 	)
 	indicatorOptions:AddModOption(
-		"lighterDisplayType",
+		"lighterMoodleDisplayType",
 		"combobox",
 		1,
 		dropdownItems,
@@ -89,12 +74,6 @@ if Mod["IsMCMInstalled_v1"] then
 elseif ModOptions and ModOptions.getInstance then
 	local SETTINGS = {
 		options_data = {
-			useAlternateIcons = {
-				name = "UI_FlashlightIndicator_UseAlternateIcons",
-				tooltip = "UI_FlashlightIndicator_UseAlternateIconsTooltip",
-				default = false,
-				OnApply = onSettingApplied,
-			},
 			showBackgrounds = {
 				name = "UI_FlashlightIndicator_ShowBackgrounds",
 				tooltip = "UI_FlashlightIndicator_ShowBackgroundsTooltip",

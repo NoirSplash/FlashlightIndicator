@@ -2,7 +2,7 @@
 	NAME: FlashlightIndicator.lua
 	AUTHOR: GLICK!
 	DATE: May 12, 2024
-	UPDATED: May 19 2024
+	UPDATED: May 19, 2024
 
 	This module runs a loop at a constant rate which checks for players who have
 	active light sources and enables the respective 'lit' icon. It also listens
@@ -16,8 +16,8 @@
 	hurting readability :P
 ]]
 
-local IndicatorIcon = require("FlashlightIndicatorIcon")
 local IndicatorOptions = require("FlashlightIndicatorOptions")
+local IndicatorIconController = require("FlashlightIndicatorIconController")
 
 -- This determines how often we check players for light sources in milliseconds.
 -- Lowering this will increase performance impact and responsiveness.
@@ -28,8 +28,10 @@ local FlashlightIndicator = {}
 	[useAlternateIcons]
 	If true, icons and moodles will use the alternate icon set. Default false.
 
-	[showBackgrounds]
-	If disabled the moodle backgrounds will be set to nil.
+	[indicatorPosition]
+	Dictates where to render the indicator icon.
+	Default 1.
+	1-AboveCharacter | 2-BelowCharacter
 
 	[flashlightDisplayType]
 	Determines if to show the display when your torch is on, off, both or never.
@@ -43,14 +45,14 @@ local FlashlightIndicator = {}
 ]]
 FlashlightIndicator.settings = {
 	useAlternateIcons = false,
-	showBackgrounds = false,
+	indicatorPosition = 1,
 	flashlightDisplayType = 1,
 	lighterDisplayType = 1,
 }
-
-local displayTypeActivationMap = { [1] = true, [2] = true, [3] = false, [4] = false }
-local lastTimestamp = os.time() - REFRESH_RATE_MILLIS
---local lastTimestamp = Calendar:getTimeInMillis() - REFRESH_RATE_MILLIS
+-- Storing the os.time() function locally to avoid having to access the global
+-- namespace every tick
+local time = os.time
+local lastTimestamp = time() - REFRESH_RATE_MILLIS
 local playersEquippedItems = {} --:{ [playerIndex<number>]: { [number]: { InventoryItem, TorchType } }
 
 local isTorchType = {
@@ -83,7 +85,7 @@ local function filterUnequippedItems(playerObject, itemList)
 		local equipped = playerObject:isEquipped(inventoryItem)
 		local attached = playerObject:isAttachedItem(inventoryItem)
 		if not equipped and not attached then
-			IndicatorIcon.Hide(playerObject, torchType)
+			IndicatorIconController.Hide(playerObject, torchType)
 			table.remove(itemList, index)
 		end
 	end
@@ -101,9 +103,9 @@ end
 -- LightingJNI.java handles lighting updates internally each tick and cannot
 -- be forked so unfortunately we poll for active lighting items instead of
 -- listening to relevant events.
--- (If you're aware of a better way to do this, please contact me on Steam -GLICK!)
+-- (If you're aware of a better way to do this, please contact me on discord @grimno1re)
 local function update()
-	local now = os.time()
+	local now = time()
 	if now - lastTimestamp < REFRESH_RATE_MILLIS then
 		return
 	end
@@ -125,17 +127,14 @@ local function update()
 
 		for torchType, _isActiveLight in pairs(isTorchType) do
 			if playerActiveTorchTypes[torchType] then
-				if not IndicatorIcon.IsActive(playerObject, torchType) then
-					IndicatorIcon.Activate(playerObject, torchType)
+				if not IndicatorIconController.IsActive(playerObject, torchType) then
+					IndicatorIconController.Activate(playerObject, torchType)
 				end
-			elseif IndicatorIcon.IsEnabled(playerObject, torchType) then
-				IndicatorIcon.Deactivate(playerObject, torchType)
+			elseif IndicatorIconController.IsEnabled(playerObject, torchType)
+				and IndicatorIconController.IsActive(playerObject, torchType)
+			then
+				IndicatorIconController.Deactivate(playerObject, torchType)
 			end
-			-- if not playerActiveTorchTypes[torchType]
-			-- 	and IndicatorIcon.IsEnabled(playerObject, torchType)
-			-- then
-			-- 	IndicatorIcon.Deactivate(playerObject, torchType)
-			-- end
 		end
 
 		local playerItems = playersEquippedItems[playerIndex]
@@ -162,7 +161,7 @@ local function onItemEquipped(isoGameCharacter, inventoryItem)
 	if itemTorchType then
 		forAllPlayers(function(playerIndex, playerObject)
 			if isoGameCharacter == playerObject then
-				IndicatorIcon.Deactivate(playerObject, itemTorchType)
+				IndicatorIconController.Deactivate(playerObject, itemTorchType)
 				if not playersEquippedItems[playerIndex] then
 					playersEquippedItems[playerIndex] = {}
 				end
@@ -177,13 +176,12 @@ end
 local function onPlayerDied(playerObject)
 	playersEquippedItems[playerObject:getPlayerNum()] = {}
 	for torchType, _hasLight in pairs(isTorchType) do
-		IndicatorIcon.Hide(playerObject, torchType)
+		IndicatorIconController.Hide(playerObject, torchType)
 	end
 end
 
 local function onPlayerCreated(_playerIndex, playerObject)
-	IndicatorIcon.SetIcons(FlashlightIndicator.settings.useAlternateIcons)
-	IndicatorIcon.SetBackgroundsEnabled(FlashlightIndicator.settings.showBackgrounds)
+	IndicatorIconController.SetIcons(FlashlightIndicator.settings.useAlternateIcons)
 
 	-- We enable moodles for players on join based on their equipped items
 	local function parseItem(inventoryItem)
@@ -196,7 +194,7 @@ local function onPlayerCreated(_playerIndex, playerObject)
 			if result == true then
 				-- Deactivate() instead of Activate() since our update() loop will
 				-- handle activation anyways
-				IndicatorIcon.Deactivate(playerObject, torchType)
+				IndicatorIconController.Deactivate(playerObject, torchType)
 
 				local playerIndex = playerObject:getPlayerNum()
 				if not playersEquippedItems[playerIndex] then
@@ -221,20 +219,20 @@ end
 if IndicatorOptions and IndicatorOptions.onSettingApplied then
 	local settingSideEffects = {
 		useAlternateIcons = function(_oldValue, newValue)
-			IndicatorIcon.SetIcons(newValue)
+			IndicatorIconController.SetIcons(newValue)
 		end,
-		showBackgrounds = function(_oldValue, newValue)
-			IndicatorIcon.SetBackgroundsEnabled(newValue)
+		indicatorPosition = function(_oldValue, newValue)
+			IndicatorIconController.SetRenderPosition(newValue)
 		end,
 		flashlightDisplayType = function(_oldValue, newValue)
-			IndicatorIcon.torchDisplayTypes["Flashlight"] = newValue
+			IndicatorIconController.torchDisplayTypes["Flashlight"] = newValue
 		end,
 		lighterDisplayType = function(_oldValue, newValue)
-			IndicatorIcon.torchDisplayTypes["Lighter"] = newValue
+			IndicatorIconController.torchDisplayTypes["Lighter"] = newValue
 		end,
 	}
 
-	IndicatorOptions.onSettingApplied(function(data)
+	local function applySettings(data)
 		local function setValueForKey(settingKey, settingValue)
 			if settingSideEffects[settingKey]
 				and FlashlightIndicator.settings[settingKey] ~= settingValue
@@ -249,11 +247,16 @@ if IndicatorOptions and IndicatorOptions.onSettingApplied then
 		for settingKey, settingValue in pairs(settings) do
 			setValueForKey(settingKey, settingValue)
 		end
-	end)
+	end
+
+	applySettings({ settings = { options = FlashlightIndicator.settings } })
+	IndicatorOptions.onSettingApplied(applySettings)
 end
 
-IndicatorIcon.torchDisplayTypes["Flashlight"] = FlashlightIndicator.settings.flashlightDisplayType
-IndicatorIcon.torchDisplayTypes["Lighter"] = FlashlightIndicator.settings.lighterDisplayTypeDisplayType
+-- IndicatorIconController.torchDisplayTypes["Flashlight"] = FlashlightIndicator.settings.flashlightDisplayType
+-- IndicatorIconController.torchDisplayTypes["Lighter"] = FlashlightIndicator.settings.lighterDisplayType
+-- IndicatorIconController.SetIcons(FlashlightIndicator.settings.useAlternateIcons)
+-- IndicatorIconController.SetRenderPosition(FlashlightIndicator.settings.indicatorPosition)
 
 Events.OnPlayerUpdate.Add(update)
 Events.OnEquipPrimary.Add(onItemEquipped)
