@@ -21,18 +21,12 @@ local function activateIcon(playerObject, torchType)
 	if element then
 		element:activateIcon(torchType)
 	end
-	if TorchMoodle ~= false and TorchMoodle.Activate then
-		TorchMoodle.Activate(playerObject, torchType)
-	end
 end
 
 local function deactivateIcon(playerObject, torchType)
 	local element = playerUIElements[playerObject:getPlayerNum()]
 	if element then
 		element:deactivateIcon(torchType)
-	end
-	if TorchMoodle ~= false and TorchMoodle.Deactivate then
-		TorchMoodle.Deactivate(playerObject, torchType)
 	end
 end
 
@@ -41,6 +35,21 @@ local function hideIcon(playerObject, torchType)
 	if element then
 		element:hideIcon(torchType)
 	end
+end
+
+local function activateMoodle(playerObject, torchType)
+	if TorchMoodle ~= false and TorchMoodle.Activate then
+		TorchMoodle.Activate(playerObject, torchType)
+	end
+end
+
+local function deactivateMoodle(playerObject, torchType)
+	if TorchMoodle ~= false and TorchMoodle.Deactivate then
+		TorchMoodle.Deactivate(playerObject, torchType)
+	end
+end
+
+local function hideMoodle(playerObject, torchType)
 	if TorchMoodle ~= false and TorchMoodle.Hide then
 		TorchMoodle.Hide(playerObject, torchType)
 	end
@@ -59,6 +68,10 @@ FlashlightIndicatorIconController.torchDisplayTypes = {
 	Flashlight = 1,
 	Lighter = 1,
 }
+FlashlightIndicatorIconController.moodleDisplayTypes = {
+	Flashlight = 1,
+	Lighter = 1,
+}
 FlashlightIndicatorIconController.useAlternateIcons = false
 FlashlightIndicatorIconController.indicatorPosition = 1
 
@@ -68,8 +81,17 @@ function FlashlightIndicatorIconController.Activate(playerObject, torchType)
 	then
 		activateIcon(playerObject, torchType)
 	else
-		FlashlightIndicatorIconController.Hide(playerObject, torchType)
+		hideIcon(playerObject, torchType)
 	end
+
+	if FlashlightIndicatorIconController.moodleDisplayTypes[torchType] == 1
+		or FlashlightIndicatorIconController.moodleDisplayTypes[torchType] == 2
+	then
+		activateMoodle(playerObject, torchType)
+	else
+		hideMoodle(playerObject, torchType)
+	end
+
 	setPlayerStatus(playerObject, torchType, true)
 end
 
@@ -79,13 +101,23 @@ function FlashlightIndicatorIconController.Deactivate(playerObject, torchType)
 	then
 		deactivateIcon(playerObject, torchType)
 	else
-		FlashlightIndicatorIconController.Hide(playerObject, torchType)
+		hideIcon(playerObject, torchType)
 	end
+
+	if FlashlightIndicatorIconController.moodleDisplayTypes[torchType] == 1
+		or FlashlightIndicatorIconController.moodleDisplayTypes[torchType] == 3
+	then
+		deactivateMoodle(playerObject, torchType)
+	else
+		hideMoodle(playerObject, torchType)
+	end
+
 	setPlayerStatus(playerObject, torchType, false)
 end
 
 function FlashlightIndicatorIconController.Hide(playerObject, torchType)
 	hideIcon(playerObject, torchType)
+	hideMoodle(playerObject, torchType)
 	setPlayerStatus(playerObject, torchType, nil)
 end
 
@@ -115,6 +147,12 @@ function FlashlightIndicatorIconController.SetRenderPosition(indicatorPosition)
 	FlashlightIndicatorIconController.indicatorPosition = indicatorPosition
 	for _playerIndex, element in pairs(playerUIElements) do
 		element.renderPosition = indicatorPosition
+	end
+end
+
+function FlashlightIndicatorIconController.SetBackgroundsEnabled(showBackgrounds)
+	if TorchMoodle then
+		TorchMoodle.SetBackgroundsEnabled(showBackgrounds)
 	end
 end
 

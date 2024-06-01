@@ -13,14 +13,18 @@ local ICON_DIRECTORIES = {
 	Standard = "media/ui/flashlightIndicator/",
 	Alternate = "media/ui/flashlightIndicator/alternateTextures/",
 }
-local TILE_OFFSET_ABOVE_CHARACTER = 2.5
-local TILE_OFFSET_BELOW_CHARACTER = -0.75
+local TILE_OFFSET_ABOVE_CHARACTER = -2.5
+local TILE_OFFSET_BELOW_CHARACTER = 0.75
 local ICON_SIZE = 30
 local ICON_PADDING = 4
 
 local core = getCore()
 local math = math
 local getTexture = getTexture
+local getNumActivePlayers = getNumActivePlayers
+local getPlayerScreenWidth = getPlayerScreenWidth
+local getPlayerScreenLeft = getPlayerScreenLeft
+
 local renderPositions = {
 	[1] = TILE_OFFSET_ABOVE_CHARACTER,
 	[2] = TILE_OFFSET_BELOW_CHARACTER,
@@ -81,7 +85,7 @@ function FlashlightIndicatorUIElement:getNumVisibleIcons() --> number
 	return visibleIcons
 end
 
-function FlashlightIndicatorUIElement:getMinWidthToHoldNumIcons(numVisibleIcons)
+function FlashlightIndicatorUIElement:getMinWidthToHoldNumIcons(numVisibleIcons) --> number
 	local cellWidth = self.iconSize + ICON_PADDING
 	return cellWidth * numVisibleIcons
 end
@@ -104,6 +108,36 @@ function FlashlightIndicatorUIElement:hideIcon(torchType)
 	end
 end
 
+function FlashlightIndicatorUIElement:getIsoWorldPosition(totalWidth, numIcons) --> (number, number)
+	local playerObject = self.playerObject
+	local y = isoToScreenY(
+		self.playerIndex,
+		playerObject:getX() + renderPositions[self.renderPosition],
+		playerObject:getY() + renderPositions[self.renderPosition],
+		playerObject:getZ()
+	)
+	local x = isoToScreenX(
+		self.playerIndex,
+		playerObject:getX() + renderPositions[self.renderPosition],
+		playerObject:getY() + renderPositions[self.renderPosition],
+		playerObject:getZ()
+	)
+	-- Because our frame isn't anchored in the center, we have to offset the
+	-- final X position according to how our frame has expanded to fit the icons
+	x = x - (totalWidth * 0.5 ^ numIcons)
+	return x, y
+end
+
+function FlashlightIndicatorUIElement:getScreenPosition(totalWidth, numIcons)
+	--TODO: add option and method to render statically near hotbar
+end
+
+function FlashlightIndicatorUIElement:updateRenderPosition(totalWidth, numIcons)
+	local xPos, yPos = self:getIsoWorldPosition(totalWidth, numIcons)
+	self:setX(xPos)
+	self:setY(yPos)
+end
+
 function FlashlightIndicatorUIElement:updateYPosition()
 	local playerObject = self.playerObject
 	local y = isoToScreenY(
@@ -116,13 +150,14 @@ function FlashlightIndicatorUIElement:updateYPosition()
 end
 
 function FlashlightIndicatorUIElement:updateXPosition(totalWidth, numIcons)
-	local maxX = core:getScreenWidth()
+	local maxX = getPlayerScreenWidth(self.playerIndex)
+	local newXPosition = maxX * 0.5 - (totalWidth * 0.5 ^ numIcons)
+	if getNumActivePlayers() > 1 then
+		local minX = getPlayerScreenLeft(self.playerIndex)
+		newXPosition = newXPosition + minX
+	end
 	-- I am very poor at math. Pls point out if this sucks.
-	self:setX(maxX * 0.5 - (totalWidth * 0.5^numIcons))
-end
-
-function FlashlightIndicatorUIElement:prerender()
-	self:stayOnSplitScreen(self.playerIndex)
+	self:setX(newXPosition)
 end
 
 function FlashlightIndicatorUIElement:render()
@@ -172,8 +207,7 @@ function FlashlightIndicatorUIElement:render()
 	self.renderScale = clamp(1 / self.cameraZoom ^ 1.5, 0.5, 1.75)
 	self.iconSize = ICON_SIZE * self.renderScale
 	--print("[DEBUG] FlashlightIndicator scale is now ", self.renderScale)
-	self:updateXPosition(totalWidth, numVisibleIcons)
-	self:updateYPosition()
+	self:updateRenderPosition(totalWidth, numVisibleIcons)
 end
 
 return FlashlightIndicatorUIElement

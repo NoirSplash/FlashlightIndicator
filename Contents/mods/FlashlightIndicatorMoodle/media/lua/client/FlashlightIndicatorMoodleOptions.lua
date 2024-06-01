@@ -1,14 +1,15 @@
 --[[
-	NAME: FlashlightIndicatorOptions.lua
+	NAME: FlashlightIndicatorMoodleOptions.lua
 	AUTHOR: GLICK!
-	DATE: May 12, 2024
-	UPDATED: May 19, 2024
+	DATE: May 19, 2024
+	UPDATED: May 30, 2024
 
 	This is an accessory module meant to provide user settings through
 	'Mod Config Menu' and 'ModOptions'.
 
 	Only required if 'Mod Config Menu' or 'ModOptions' is being used.
-	For the main functionality module, see `client/FlashlightIndicator.lua`
+	For the main functionality module, see `client/FlashlightIndicatorMoodle.lua`
+	This module is forked from FlashlightIndicatorOptions.lua.
 ]]
 
 local onSettingAppliedCallback = nil
@@ -57,18 +58,18 @@ if Mod["IsMCMInstalled_v1"] then
 		"combobox",
 		1,
 		dropdownItems,
-		getText("UI_FlashlightIndicator_FlashlightDisplayType"),
-		getText("UI_FlashlightIndicator_FlashlightDisplayTypeTooltip"),
-		getSettingAppliedHandler("flashlightDisplayType")
+		getText("UI_FlashlightIndicator_FlashlightMoodleDisplayType"),
+		getText("UI_FlashlightIndicator_FlashlightMoodleDisplayTypeTooltip"),
+		getSettingAppliedHandler("flashlightMoodleDisplayType")
 	)
 	indicatorOptions:AddModOption(
 		"lighterMoodleDisplayType",
 		"combobox",
 		1,
 		dropdownItems,
-		getText("UI_FlashlightIndicator_LighterDisplayType"),
-		getText("UI_FlashlightIndicator_LighterDisplayTypeTooltip"),
-		getSettingAppliedHandler("lighterDisplayType")
+		getText("UI_FlashlightIndicator_LighterMoodleDisplayType"),
+		getText("UI_FlashlightIndicator_LighterMoodleDisplayTypeTooltip"),
+		getSettingAppliedHandler("lighterMoodleDisplayType")
 	)
 
 elseif ModOptions and ModOptions.getInstance then
@@ -80,35 +81,35 @@ elseif ModOptions and ModOptions.getInstance then
 				default = false,
 				OnApply = onSettingApplied,
 			},
-			flashlightDisplayType = { -- mm yummy mixed table :p
+			flashlightMoodleDisplayType = {
 				[1] = getText("UI_FlashlightIndicator_DropdownOptionBoth"),
 				[2] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOn"),
 				[3] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOff"),
 				[4] = getText("UI_FlashlightIndicator_DropdownOptionDisabled"),
-				name = "UI_FlashlightIndicator_FlashlightDisplayType",
-				tooltip = "UI_FlashlightIndicator_FlashlightDisplayTypeTooltip",
+				name = "UI_FlashlightIndicator_FlashlightMoodleDisplayType",
+				tooltip = "UI_FlashlightIndicator_FlashlightMoodleDisplayTypeTooltip",
 				default = 1,
 				OnApply = onSettingApplied,
 			},
-			lighterDisplayType = {
+			lighterMoodleDisplayType = {
 				[1] = getText("UI_FlashlightIndicator_DropdownOptionBoth"),
 				[2] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOn"),
 				[3] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOff"),
 				[4] = getText("UI_FlashlightIndicator_DropdownOptionDisabled"),
-				name = "UI_FlashlightIndicator_LighterDisplayType",
-				tooltip = "UI_FlashlightIndicator_LighterDisplayTypeTooltip",
+				name = "UI_FlashlightIndicator_LighterMoodleDisplayType",
+				tooltip = "UI_FlashlightIndicator_LighterMoodleDisplayTypeTooltip",
 				default = 1,
 				OnApply = onSettingApplied,
 			},
 		},
 		-- "mod_id" does not need to match the actual mod id (workshop nor folder)
-		mod_id = "FlashlightIndicator",
+		mod_id = "FlashlightIndicatorMoodle",
 		-- The ModOptions author does not provide an explanation for what
 		-- "mod_shortname" is but it seems to be unused. We define it just in case.
-		mod_shortname = "Torch Status",
+		mod_shortname = "Torch Moodle",
 		-- "mod_fullname" seems to determine sort order as well as being displayed
 		-- in the section header
-		mod_fullname = "Flashlight Indicator",
+		mod_fullname = "Flashlight Indicator - Moodle",
 	}
 
 	-- This function call adds our settings to the manager and mutates our table

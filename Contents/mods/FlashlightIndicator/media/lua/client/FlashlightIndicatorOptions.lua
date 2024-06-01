@@ -22,7 +22,7 @@ end
 -- We use an exclusive condition because if both mods are enabled we want to
 -- prioritize MCM
 if Mod["IsMCMInstalled_v1"] then
-	local indicatorOptions = ModOptionTable:New("FlashlightIndicator", "Flashlight Indicator", false)
+	local indicatorOptions = ModOptionTable:New("FlashlightIndicator", "Flashlight Indicators", false)
 	local dropdownItems = {
 		[1] = getText("UI_FlashlightIndicator_DropdownOptionBoth"),
 		[2] = getText("UI_FlashlightIndicator_DropdownOptionOnlyOn"),
@@ -95,10 +95,12 @@ elseif ModOptions and ModOptions.getInstance then
 				default = false,
 				OnApply = onSettingApplied,
 			},
-			showBackgrounds = {
-				name = "UI_FlashlightIndicator_ShowBackgrounds",
-				tooltip = "UI_FlashlightIndicator_ShowBackgroundsTooltip",
-				default = false,
+			indicatorPosition = {
+				[1] = getText("UI_FlashlightIndicator_DropdownOptionAbove"),
+				[2] = getText("UI_FlashlightIndicator_DropdownOptionBelow"),
+				name = "UI_FlashlightIndicator_IndicatorPosition",
+				tooltip = "UI_FlashlightIndicator_IndicatorPositionTooltip",
+				default = 1,
 				OnApply = onSettingApplied,
 			},
 			flashlightDisplayType = { -- mm yummy mixed table :p

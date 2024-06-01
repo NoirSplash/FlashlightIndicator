@@ -17,6 +17,7 @@ local NOOP = function() end
 
 local TorchMoodle = {
 	playerMoodles = {},
+	showBackgrounds = false,
 	Activate = NOOP,
 	Deactivate = NOOP,
 	Hide = NOOP,
@@ -106,6 +107,7 @@ local function onPlayerCreated(_playerIndex, _playerObject)
 	for _, moodleName in ipairs(MOODLE_NAMES) do
 		updateMoodleThresholds(moodleName)
 	end
+	TorchMoodle.SetBackgroundsEnabled(TorchMoodle.showBackgrounds)
 end
 
 --NOTE: API argument order is purposefully swapped to incentivize providing
@@ -257,6 +259,8 @@ function TorchMoodle.SetBackgroundsEnabled(showBackgrounds)
 			setMoodleBackgroundsForPlayer(playerObject)
 		end
 	end
+	-- This variable is used to update backgrounds on new player join
+	TorchMoodle.showBackgrounds = showBackgrounds
 end
 
 for _, moodleName in ipairs(MOODLE_NAMES) do

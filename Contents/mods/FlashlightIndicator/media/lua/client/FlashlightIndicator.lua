@@ -18,6 +18,7 @@
 
 local IndicatorOptions = require("FlashlightIndicatorOptions")
 local IndicatorIconController = require("FlashlightIndicatorIconController")
+local MoodleOptions = getActivatedMods():contains("FlashlightIndicatorMoodle") and require("FlashlightIndicatorMoodleOptions")
 
 -- This determines how often we check players for light sources in milliseconds.
 -- Lowering this will increase performance impact and responsiveness.
@@ -25,6 +26,8 @@ local REFRESH_RATE_MILLIS = 0.250
 
 local FlashlightIndicator = {}
 --[[
+	# Indicator Options
+
 	[useAlternateIcons]
 	If true, icons and moodles will use the alternate icon set. Default false.
 
@@ -34,12 +37,27 @@ local FlashlightIndicator = {}
 	1-AboveCharacter | 2-BelowCharacter
 
 	[flashlightDisplayType]
-	Determines if to show the display when your torch is on, off, both or never.
+	Determines whether to show the icon when your torch is on, off, both or never.
 	Default 1.
 	1-Both | 2-Only On | 3-Only Off | 4-Disabled
 
 	[lighterDisplayType]
-	Determines if to show the display when your lighter is on, off, both or never.
+	Determines whether to show the icon when your lighter is on, off, both or never.
+	Default 1.
+	1-Both | 2-Only On | 3-Only Off | 4-Disabled
+
+	# Moodle Options
+
+	[showBackgrounds]
+	Toggles visibility of the moodle background image. Default false.
+	
+	[flashlightMoodleDisplayType]
+	Determines whether to show the moodle when your torch is on, off, both or never.
+	Default 1.
+	1-Both | 2-Only On | 3-Only Off | 4-Disabled
+
+	[lighterMoodleDisplayType]
+	Determines whether to show the moodle when your lighter is on, off, both or never.
 	Default 1.
 	1-Both | 2-Only On | 3-Only Off | 4-Disabled
 ]]
@@ -48,6 +66,10 @@ FlashlightIndicator.settings = {
 	indicatorPosition = 1,
 	flashlightDisplayType = 1,
 	lighterDisplayType = 1,
+
+	showBackgrounds = false,
+	flashlightMoodleDisplayType = 1,
+	lighterMoodleDisplayType = 1,
 }
 -- Storing the os.time() function locally to avoid having to access the global
 -- namespace every tick
@@ -215,8 +237,7 @@ local function onPlayerCreated(_playerIndex, playerObject)
 	end
 end
 
--- Support for ModOptions/MCM through FlashlightIndicatorOptions.lua
-if IndicatorOptions and IndicatorOptions.onSettingApplied then
+if IndicatorOptions or MoodleOptions then
 	local settingSideEffects = {
 		useAlternateIcons = function(_oldValue, newValue)
 			IndicatorIconController.SetIcons(newValue)
@@ -229,6 +250,16 @@ if IndicatorOptions and IndicatorOptions.onSettingApplied then
 		end,
 		lighterDisplayType = function(_oldValue, newValue)
 			IndicatorIconController.torchDisplayTypes["Lighter"] = newValue
+		end,
+
+		showBackgrounds = function(_oldValue, newValue)
+			IndicatorIconController.SetBackgroundsEnabled(newValue)
+		end,
+		flashlightMoodleDisplayType = function(_oldValue, newValue)
+			IndicatorIconController.moodleDisplayTypes["Flashlight"] = newValue
+		end,
+		lighterMoodleDisplayType = function(_oldValue, newValue)
+			IndicatorIconController.moodleDisplayTypes["Lighter"] = newValue
 		end,
 	}
 
@@ -249,19 +280,26 @@ if IndicatorOptions and IndicatorOptions.onSettingApplied then
 		end
 	end
 
+	-- Support for ModOptions/MCM through FlashlightIndicatorOptions.lua
+	if IndicatorOptions and IndicatorOptions.onSettingApplied then
+		print("[DEBUG] Flashlight Indicator Options Initialized")
+		IndicatorOptions.onSettingApplied(applySettings)
+	end
+	-- Support for ModOptions/MCM through FlashlightIndicatorMoodleOptions.lua
+	if MoodleOptions and MoodleOptions.onSettingApplied then
+		print("[DEBUG] Flashlight Moodle Options Initialized")
+		MoodleOptions.onSettingApplied(applySettings)
+	end
+
 	applySettings({ settings = { options = FlashlightIndicator.settings } })
-	IndicatorOptions.onSettingApplied(applySettings)
 end
 
--- IndicatorIconController.torchDisplayTypes["Flashlight"] = FlashlightIndicator.settings.flashlightDisplayType
--- IndicatorIconController.torchDisplayTypes["Lighter"] = FlashlightIndicator.settings.lighterDisplayType
--- IndicatorIconController.SetIcons(FlashlightIndicator.settings.useAlternateIcons)
--- IndicatorIconController.SetRenderPosition(FlashlightIndicator.settings.indicatorPosition)
 
 Events.OnPlayerUpdate.Add(update)
 Events.OnEquipPrimary.Add(onItemEquipped)
 Events.OnEquipSecondary.Add(onItemEquipped)
 Events.OnPlayerDeath.Add(onPlayerDied)
 Events.OnCreatePlayer.Add(onPlayerCreated)
+
 
 return FlashlightIndicator
