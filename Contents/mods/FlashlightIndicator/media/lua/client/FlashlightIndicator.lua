@@ -79,7 +79,7 @@ local playersEquippedItems = {} --:{ [playerIndex<number>]: { [number]: { Invent
 
 local isTorchType = {
 	Flashlight = function(inventoryItem)
-		return inventoryItem:isTorchCone() ~= false
+		return inventoryItem:isTorchCone() == true
 	end,
 	Lighter = function(inventoryItem)
 		return inventoryItem:getTorchDot() > 0
@@ -148,10 +148,11 @@ local function update()
 		end
 
 		for torchType, _isActiveLight in pairs(isTorchType) do
-			if playerActiveTorchTypes[torchType] then
+			if playerActiveTorchTypes[torchType] == true then
 				if not IndicatorIconController.IsActive(playerObject, torchType) then
 					IndicatorIconController.Activate(playerObject, torchType)
 				end
+
 			elseif IndicatorIconController.IsEnabled(playerObject, torchType)
 				and IndicatorIconController.IsActive(playerObject, torchType)
 			then
@@ -205,6 +206,11 @@ end
 local function onPlayerCreated(_playerIndex, playerObject)
 	IndicatorIconController.SetIcons(FlashlightIndicator.settings.useAlternateIcons)
 
+	local playerIndex = playerObject:getPlayerNum()
+	if not playersEquippedItems[playerIndex] then
+		playersEquippedItems[playerIndex] = {}
+	end
+
 	-- We enable moodles for players on join based on their equipped items
 	local function parseItem(inventoryItem)
 		if not inventoryItem then
@@ -217,11 +223,6 @@ local function onPlayerCreated(_playerIndex, playerObject)
 				-- Deactivate() instead of Activate() since our update() loop will
 				-- handle activation anyways
 				IndicatorIconController.Deactivate(playerObject, torchType)
-
-				local playerIndex = playerObject:getPlayerNum()
-				if not playersEquippedItems[playerIndex] then
-					playersEquippedItems[playerIndex] = {}
-				end
 				table.insert(playersEquippedItems[playerIndex], { inventoryItem, torchType })
 
 				break
@@ -278,28 +279,28 @@ if IndicatorOptions or MoodleOptions then
 		for settingKey, settingValue in pairs(settings) do
 			setValueForKey(settingKey, settingValue)
 		end
+
+		IndicatorIconController.OnVisibilityUpdate()
 	end
 
 	-- Support for ModOptions/MCM through FlashlightIndicatorOptions.lua
 	if IndicatorOptions and IndicatorOptions.onSettingApplied then
-		print("[DEBUG] Flashlight Indicator Options Initialized")
+		--print("[DEBUG] Flashlight Indicator Options Initialized")
 		IndicatorOptions.onSettingApplied(applySettings)
 	end
 	-- Support for ModOptions/MCM through FlashlightIndicatorMoodleOptions.lua
 	if MoodleOptions and MoodleOptions.onSettingApplied then
-		print("[DEBUG] Flashlight Moodle Options Initialized")
+		--print("[DEBUG] Flashlight Moodle Options Initialized")
 		MoodleOptions.onSettingApplied(applySettings)
 	end
 
 	applySettings({ settings = { options = FlashlightIndicator.settings } })
 end
 
-
 Events.OnPlayerUpdate.Add(update)
 Events.OnEquipPrimary.Add(onItemEquipped)
 Events.OnEquipSecondary.Add(onItemEquipped)
 Events.OnPlayerDeath.Add(onPlayerDied)
 Events.OnCreatePlayer.Add(onPlayerCreated)
-
 
 return FlashlightIndicator

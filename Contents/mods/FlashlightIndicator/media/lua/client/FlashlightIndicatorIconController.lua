@@ -17,21 +17,21 @@ local playerStatuses = {}
 local playerUIElements = {}
 
 local function activateIcon(playerObject, torchType)
-	local element = playerUIElements[playerObject:getPlayerNum()]
+	local element = playerUIElements[playerObject]
 	if element then
 		element:activateIcon(torchType)
 	end
 end
 
 local function deactivateIcon(playerObject, torchType)
-	local element = playerUIElements[playerObject:getPlayerNum()]
+	local element = playerUIElements[playerObject]
 	if element then
 		element:deactivateIcon(torchType)
 	end
 end
 
 local function hideIcon(playerObject, torchType)
-	local element = playerUIElements[playerObject:getPlayerNum()]
+	local element = playerUIElements[playerObject]
 	if element then
 		element:hideIcon(torchType)
 	end
@@ -56,11 +56,10 @@ local function hideMoodle(playerObject, torchType)
 end
 
 local function setPlayerStatus(playerObject, torchType, value)
-	local playerIndex = playerObject:getPlayerNum()
-	if not playerStatuses[playerIndex] then
-		playerStatuses[playerIndex] = {}
+	if not playerStatuses[playerObject] then
+		playerStatuses[playerObject] = {}
 	end
-	playerStatuses[playerIndex][torchType] = value
+	playerStatuses[playerObject][torchType] = value
 end
 
 local FlashlightIndicatorIconController = {}
@@ -122,20 +121,18 @@ function FlashlightIndicatorIconController.Hide(playerObject, torchType)
 end
 
 function FlashlightIndicatorIconController.IsActive(playerObject, torchType)
-	local playerIndex = playerObject:getPlayerNum()
-	local playerStatus = playerStatuses[playerIndex]
+	local playerStatus = playerStatuses[playerObject]
 	return playerStatus and playerStatus[torchType] == true
 end
 
 function FlashlightIndicatorIconController.IsEnabled(playerObject, torchType)
-	local playerIndex = playerObject:getPlayerNum()
-	local playerStatus = playerStatuses[playerIndex]
+	local playerStatus = playerStatuses[playerObject]
 	return playerStatus and playerStatus[torchType] ~= nil
 end
 
 function FlashlightIndicatorIconController.SetIcons(useAlternateIcons)
 	FlashlightIndicatorIconController.useAlternateIcons = useAlternateIcons
-	for _playerIndex, element in pairs(playerUIElements) do
+	for _playerObject, element in pairs(playerUIElements) do
 		element.useAlternateIcons = useAlternateIcons
 	end
 	if TorchMoodle then
@@ -145,7 +142,7 @@ end
 
 function FlashlightIndicatorIconController.SetRenderPosition(indicatorPosition)
 	FlashlightIndicatorIconController.indicatorPosition = indicatorPosition
-	for _playerIndex, element in pairs(playerUIElements) do
+	for _playerObject, element in pairs(playerUIElements) do
 		element.renderPosition = indicatorPosition
 	end
 end
@@ -157,6 +154,28 @@ function FlashlightIndicatorIconController.SetBackgroundsEnabled(showBackgrounds
 end
 
 --[[
+	Refreshes current icon visibility in case settings are adjusted so that changes
+	are reflected immediately.
+]]
+function FlashlightIndicatorIconController.OnVisibilityUpdate()
+	local function updateVisibilityForPlayer(playerObject, torchStatuses)
+		for torchType, isActive in pairs(torchStatuses) do
+			if isActive == true then
+				FlashlightIndicatorIconController.Activate(playerObject, torchType)
+			elseif isActive == false then
+				FlashlightIndicatorIconController.Deactivate(playerObject, torchType)
+			else
+				FlashlightIndicatorIconController.Hide(playerObject, torchType)
+			end
+		end
+	end
+
+	for playerObject, torchStatuses in pairs(playerStatuses) do
+		updateVisibilityForPlayer(playerObject, torchStatuses)
+	end
+end
+
+--[[
 	Executes on player added to world. Public in case anyone needs to reference
 	the function to remove the connection.
 
@@ -164,9 +183,13 @@ end
 	@param2 <IsoPlayer> playerObject
 ]]
 function FlashlightIndicatorIconController._onPlayerCreated(playerIndex, playerObject)
-	playerUIElements[playerIndex] = IndicatorUIElement.new(playerIndex, playerObject)
-	playerUIElements[playerIndex].renderPosition = FlashlightIndicatorIconController.indicatorPosition
-	playerUIElements[playerIndex].useAlternateIcons = FlashlightIndicatorIconController.useAlternateIcons
+	playerUIElements[playerObject] = IndicatorUIElement.new(playerIndex, playerObject)
+	playerUIElements[playerObject].renderPosition = FlashlightIndicatorIconController.indicatorPosition
+	playerUIElements[playerObject].useAlternateIcons = FlashlightIndicatorIconController.useAlternateIcons
+
+	if not playerStatuses[playerObject] then
+		playerStatuses[playerObject] = {}
+	end
 end
 Events.OnCreatePlayer.Add(FlashlightIndicatorIconController._onPlayerCreated)
 
