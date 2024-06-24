@@ -275,7 +275,13 @@ if IndicatorOptions or MoodleOptions then
 			FlashlightIndicator.settings[settingKey] = settingValue
 		end
 
-		local settings = data.settings.options
+		local settings = data.settings and data.settings.options
+		-- Non-critical bug was reported for this, not sure the cause but this
+		-- should minimize console spam
+		if not settings then
+			print("[ERROR] Flashlight indicator failed to apply settings; Table is missing or nil")
+			return
+		end
 		for settingKey, settingValue in pairs(settings) do
 			setValueForKey(settingKey, settingValue)
 		end

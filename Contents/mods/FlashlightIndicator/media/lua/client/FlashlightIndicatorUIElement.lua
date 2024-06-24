@@ -181,7 +181,7 @@ function FlashlightIndicatorUIElement:render()
 		if texture then
 			self:drawTextureScaledUniform(texture, xOffset, -self.iconSize * 0.5, self.renderScale, 1)
 		elseif not self._debugWarnings[texturePath] then
-			--print("[ERROR] FlashlightIndicator failed to render icon; Invalid texture path '" .. texturePath .. "'")
+			print("[ERROR] FlashlightIndicator failed to render UI element; Invalid texture path '" .. texturePath .. "'")
 			self._debugWarnings[texturePath] = true
 		end
 	end
