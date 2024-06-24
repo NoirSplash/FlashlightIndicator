@@ -1,8 +1,41 @@
 version=1
+id=3258527138
 title=Flashlight Indicator
-description=This is an example mod with two worlds.  You can use this as a template for your own map mods.
+description=[b]Flashlight Indicator displays an icon on-screen to remind you that your light is on![/b]
+description=[hr]
+description=[h2]Information[/h2]
+description=[i]Can't tell if your flashlight is on during the day? Is your lighter suddenly missing? Not sure if those are your headlights or your hand torch?[/i]
+description=Flashlight Indicator solves all of these issues by displaying an icon above or below your character to let you know when you're holding a light source and whether or not it's emitting light.
 description=
-description=The first world has a single 300x300-tile cell.
-description=The second world adds cells all around the first world.
-tags=
+description=[h3]Mod Support[/h3]
+description=[b]Flashlight Indicator supports both [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2815552312]Mod Config Menu[/url] and [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2169435993]Mod Options[/url][/b].
+description=This mod provides several settings to modify the icons' appearances and behaviour. Although not required, if you want to access these settings you'll need one of the mods listed above.
+description=That being said, I highly recommended you use Mod Config Menu as it provides more ways to configure settings and in the future may contain exclusive settings not included in Mod Options.
+description=
+description=Flashlights attached to a belt with a mod such as Braven's [url=https://steamcommunity.com/workshop/filedetails/?id=2875848298]Common Sense[/url] are also supported.
+description=
+description=In the near future, I will be releasing an add-on that will allow the icons to be displayed as a moodle. This is not included in the main mod because it has a framework dependency I felt would be restrictive for the rest of the mod.
+description=
+description=[h3]Planned Features[/h3]
+description=[list]
+description=    [*]Minimal styled icons (i.e. black/white dot, small flame)
+description=    [*]Custom icon scales
+description=    [*]Hotbar placement position for icons
+description=    [*]Per-item icons (as opposed to exclusively flame/bulb)
+description=[/list]
+description=Modding is only a hobby of mine so please be patient as these features may take a long time. Thank you. 🙏
+description=
+description=
+description=[h3]Languages[/h3]
+description=Currently, only English is supported for this mod. If you're interested in providing a translation for your language, please reach out to me on Discord @grimno1re.
+description=Do not send me a friend request on Steam, I will not see it.
+description=
+description=[hr]
+description=A big shout out to the PZ Modding Community Discord for being so supportive and helping me get my footing with modding. Check them out here!
+description=[url=https://discord.gg/SReMnbV4V7][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/main/PZmodCommBanner2.png[/img][/url]
+description=[table]
+description=[tr][th]Workshop Id[/th][td]3258527138[/td][/tr]
+description=[tr][th]Mod Id[/th][td]FlashlightIndicator[/td][/tr]
+description=[/table]
+tags=Build 41;Interface;Misc;Multiplayer
 visibility=public
